@@ -1,0 +1,144 @@
+{% extends 'expense/base.html' %}
+{% load humanize %}
+
+{% block title %}
+List
+{% endblock %}
+
+{% block main %}
+<h3><i>Pong</i> — How much you spend again, haiya</h3>
+<!-- <h3>Promise me you won't spend more</h3> -->
+<!-- <h3>You told me you'd save, sugerbuns</h3> -->
+{% for m in messages %}
+  {% if m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+  <article class="max-w-fit flash">{{ m }}</article>
+  {% endif %}
+{% endfor %}
+<form action="{% url 'expense_list' %}" method="POST">
+  {% csrf_token %}
+  <div class="grid">
+    <label class="max-w-15 m-b-0">
+      <span class="f-s-1.25">Day:</span>
+      {{ form.day }}
+    </label>
+    {{ form.label }}
+  </div>
+
+  <fieldset role="group">
+    {{ form.amount }}
+    {{ form.currency }}
+    {{ form.category }}
+    <input type="submit" value="Spend" />
+  </fieldset>
+  <input type="text" class="d-none" />
+  <small>{{ form.errors }}</small>
+
+  {{ form.note }}
+</form>
+
+<h3>Listing your expenses</h3>
+<form action="{% url "expense_list" %}" method="GET" class="grid">
+  <fieldset>
+    {{ filters.from_day }}
+    <small>{{ filters.from_day.label }}</small>
+  </fieldset>
+  <fieldset>
+    {{ filters.to_day }}
+    <small>{{ filters.to_day.label }}</small>
+  </fieldset>
+  <fieldset>
+    {{ filters.category }}
+    <small>{{ filters.category.label }}</small>
+  </fieldset>
+  <div>
+    <input type="submit" value="Filter">
+    {% if not filters.is_empty %}
+    <a href="{% url "expense_list" %}">Clear</a>
+    {% endif %}
+  </div>
+</form>
+<table>
+  <thead>
+    <tr>
+      <th>Label</th>
+      <th class="align-r">Amount</th>
+      <th class="align-r">Category</th>
+      <th class="align-r">Day</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in expenses %}
+    <tr class="expense pointer">
+      <td class="cap">
+        <!-- <div class="actions">
+              <a href="{% url 'expense_update' e.id %}"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#75FBFD"><path d="M160-400v-80h280v80H160Zm0-160v-80h440v80H160Zm0-160v-80h440v80H160Zm360 560v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T863-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/></svg></a>
+              <form action="{% url 'expense_delete' e.id %}" method="POST" class="d-in-block">
+                {% csrf_token %}
+                <a href="#" onclick="this.closest('form').submit()"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg></a>
+              </form>
+
+              <form action="{% url 'expense_clone' e.id %}" method="POST" class="d-in-block">
+                {% csrf_token %}
+                <a href="#" onclick="this.closest('form').submit()"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5985E1"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg></a>
+              </form>
+            </div> -->
+        {{ e.label }} <small>{% if e.note %}(+){% endif %}</small>
+      </td>
+      <td class="align-r" title="{{ e.currency }}">
+        <b>{{ e.amount|intcomma }} {{ e.currency.symbol }}</b>
+      </td>
+      <td class="align-r">{{ e.category }}</td>
+      <td class="cap align-r" title="{{ e.day }}">{{ e.day|naturalday }}</td>
+    </tr>
+    <tr class="hide">
+      <td colspan="4" class="p-l-2.5 text-grey">
+        {% if e.note %}
+        {{ e.note|linebreaksbr }}
+        {% else %}
+        No notes.
+        {% endif %}
+
+        <a href="{% url 'expense_update' e.id %}">Edit</a>
+        —
+        <form action="{% url 'expense_delete' e.id %}" method="POST" class="d-in-block">
+          {% csrf_token %}
+          <a href="#" onclick="this.closest('form').submit();return false">Erase</a>
+        </form>
+        —
+        <form action="{% url 'expense_clone' e.id %}" method="POST" class="d-in-block">
+          {% csrf_token %}
+          <a href="#" onclick="this.closest('form').submit();return false">Clone</a>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <td colspan="4" class="align-c">Wow, you didn't spend anything!</td>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.querySelectorAll('tr.expense').forEach((row) => {
+    row.addEventListener('click', (ev) => {
+      row.nextElementSibling.classList.toggle('hide')
+    })
+  })
+
+  document.querySelector('input[name="amount"]').focus()
+
+  setTimeout(() => {
+    document.querySelector('.flash').classList.toggle('hide')
+  }, 2000)
+
+  // Maintain scroll position across page reloads.
+  const prev_scroll = sessionStorage.getItem('scroll')
+  if (prev_scroll !== null) {
+    document.documentElement.scrollTop = parseInt(prev_scroll, 10)
+  }
+  window.addEventListener('beforeunload', () => {
+    sessionStorage.setItem('scroll', document.documentElement.scrollTop)
+  })
+</script>
+{% endblock %}

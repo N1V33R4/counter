@@ -1,0 +1,31 @@
+{% extends 'expense/base.html' %}
+{% load humanize %}
+
+{% block title %}
+Mistakes are how you learn
+{% endblock %}
+
+{% block main %}
+<h3>Made a mistake? No worries, mistakes are how we learn 🤟</h3>
+<form action="{% url 'expense_update' id %}" method="POST">
+  {% csrf_token %}
+  <div class="grid">
+    <label class="max-w-15 m-b-0">
+      <span class="f-s-1.25">Day:</span>
+      {{ form.day }}
+    </label>
+    {{ form.label }}
+  </div>
+
+  <fieldset role="group">
+    {{ form.amount }}
+    {{ form.currency }}
+    {{ form.category }}
+    <input type="submit" value="Update" />
+  </fieldset>
+  <input type="text" class="d-none" />
+  <small>{{ form.errors }}</small>
+
+  {{ form.note }}
+</form>
+{% endblock %}

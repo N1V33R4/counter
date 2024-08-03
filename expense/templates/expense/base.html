@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense - {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  <style>
+    .align-l {
+      text-align: left;
+    }
+    .align-c {
+      text-align: center;
+    }
+    .align-r {
+      text-align: right;
+    }
+    .cap::first-letter {
+      text-transform: capitalize;
+    }
+    .d-none {
+      display: none;
+    }
+    .d-block {
+      display: block;
+    }
+    .d-in-block {
+      display: inline-block;
+    }
+    .p-l-2\.5 {
+      padding-left: 2.5rem;
+    }
+    .text-grey {
+      color: grey;
+    }
+    .pointer {
+      cursor: pointer;
+    }
+    .help {
+      cursor: help;
+    }
+    .max-w-15 {
+      max-width: 15rem;
+    }
+    .max-w-fit {
+      max-width: fit-content;
+    }
+    .align-s-e {
+      align-self: end;
+    }
+    .m-b-0 {
+      margin-bottom: 0;
+    }
+    .m-lr-a {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .f-s-1\.25 {
+      font-size: 1.25rem;
+    }
+
+
+    .flash {
+      background-color: #3aeb34;
+      color: #000;
+      font-weight: 600;
+      position: fixed;
+      top: 5%;
+      right: 5%;
+      z-index: 1;
+      transition: opacity 0.5s ease;
+    }
+    .flash.hide {
+      opacity: 0;
+    }
+    .signature {
+      background: linear-gradient(to right, #d78dd2, #b999ee, #9da5e9, #8fa9f0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .expense:hover td {
+      color: #ddd;
+    }
+    tr td {
+      transition: all 0.2s ease;
+    }
+
+    tr.hide td {
+      line-height: 0;
+      padding: 0px;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* .expense td:first-child {
+      position: relative;
+    }
+    .actions {
+      position: absolute;
+      top: -50%;
+      left: -8%;
+      z-index: 1;
+
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      padding-right: 2rem;
+      padding-left: 1rem;
+      
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+    .expense:hover .actions, .actions:hover {
+      opacity: 1;
+      visibility: visible;
+    }  */
+  </style>
+</head>
+
+<body class="container">
+  <header>
+    <hgroup class="align-c">
+      <h1>
+        <mark class="signature">Expense</mark> Counter
+      </h1>
+      <p>made with ❤️ @<abbr title="Hou Neavireakpong" class="help">pongteakon</abbr></p>
+    </hgroup>
+  </header>
+
+  <main>
+    {% block main %}{% endblock %}
+  </main>
+
+  {% block script %}{% endblock script %}
+</body>
+
+</html>
