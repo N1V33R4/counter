@@ -6,14 +6,15 @@ List
 {% endblock %}
 
 {% block main %}
-<h3><i>Pong</i> — How much you spend again, haiya</h3>
-<!-- <h3>Promise me you won't spend more</h3> -->
-<!-- <h3>You told me you'd save, sugerbuns</h3> -->
-{% for m in messages %}
-  {% if m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-  <article class="max-w-fit flash">{{ m }}</article>
-  {% endif %}
-{% endfor %}
+<div class="d-flex">
+  <h3 class="cap"><i>{{ user }}</i> — How much you spend again, haiya</h3>
+  <!-- <h3>Promise me you won't spend more</h3> -->
+  <!-- <h3>You told me you'd save, sugerbuns</h3> -->
+  <form action="{% url 'account_logout' %}" method="POST">
+    {% csrf_token %}
+    <a href="#" onclick="this.closest('form').submit();return false">Log out</a>
+  </form> 
+</div>
 <form action="{% url 'expense_list' %}" method="POST">
   {% csrf_token %}
   <div class="grid">
@@ -30,7 +31,6 @@ List
     {{ form.category }}
     <input type="submit" value="Spend" />
   </fieldset>
-  <input type="text" class="d-none" />
   <small>{{ form.errors }}</small>
 
   {{ form.note }}
@@ -127,10 +127,6 @@ List
   })
 
   document.querySelector('input[name="amount"]').focus()
-
-  setTimeout(() => {
-    document.querySelector('.flash').classList.toggle('hide')
-  }, 2000)
 
   // Maintain scroll position across page reloads.
   const prev_scroll = sessionStorage.getItem('scroll')

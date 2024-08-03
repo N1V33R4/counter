@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 
@@ -5,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expense - {% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  <link rel="stylesheet" href="{% static 'pico.min.css' %}">
   <style>
     .align-l {
       text-align: left;
@@ -28,6 +29,11 @@
     .d-in-block {
       display: inline-block;
     }
+    .d-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .p-l-2\.5 {
       padding-left: 2.5rem;
     }
@@ -42,6 +48,9 @@
     }
     .max-w-15 {
       max-width: 15rem;
+    }
+    .max-w-30 {
+      max-width: 30rem;
     }
     .max-w-fit {
       max-width: fit-content;
@@ -62,9 +71,6 @@
 
 
     .flash {
-      background-color: #3aeb34;
-      color: #000;
-      font-weight: 600;
       position: fixed;
       top: 5%;
       right: 5%;
@@ -73,6 +79,11 @@
     }
     .flash.hide {
       opacity: 0;
+    }
+    .flash article {
+      background-color: #3aeb34;
+      color: #000;
+      font-weight: 600;
     }
     .signature {
       background: linear-gradient(to right, #d78dd2, #b999ee, #9da5e9, #8fa9f0);
@@ -131,10 +142,23 @@
     </hgroup>
   </header>
 
+  <div class="flash">
+    {% for m in messages %}
+      {% if m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+      <article class="max-w-fit">{{ m }}</article>
+      {% endif %}
+    {% endfor %}
+  </div>
+
   <main>
     {% block main %}{% endblock %}
   </main>
 
+  <script>
+    setTimeout(() => {
+      document.querySelector('.flash').classList.toggle('hide')
+    }, 2000)
+  </script>
   {% block script %}{% endblock script %}
 </body>
 
