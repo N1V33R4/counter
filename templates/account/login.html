@@ -1,0 +1,56 @@
+{% extends 'expense/base.html' %}
+{% load i18n %}
+{% load allauth account %}
+{% load widget_tweaks %}
+
+{% block title %}
+  {% trans 'Sign In' %}
+{% endblock %}
+
+{% block main %}
+<section class="max-w-30 m-lr-a">
+  <h3>Please identify yourself.</h3>
+  <!-- <h3>Do you know who you are?</h3> -->
+  <p></p>
+  {% setvar link %}
+    <a href="{{ signup_url }}">
+  {% endsetvar %}
+  {% setvar end_link %}
+    </a>
+  {% endsetvar %}
+  <p>{% blocktranslate %}If you have not created an account yet, then please {{ link }}sign up{{ end_link }} first.{% endblocktranslate %}</p>
+    
+  <form action="{% url "account_login" %}" method="POST">
+    {% csrf_token %}
+    <fieldset>
+      <label>
+        {{ form.login.label }}
+        {% if form.non_field_errors %}
+          {{ form.login|attr:"aria-invalid:true" }}
+          {% for err in form.non_field_errors  %}
+            <small>{{ err }}</small>
+          {% endfor %}
+        {% else %}
+          {{ form.login }}
+        {% endif %}
+      </label>
+      <label>
+        {{ form.password.label }}
+        {% if form.non_field_errors %}
+          {{ form.password|attr:"aria-invalid:true" }}
+        {% else %}
+          {{ form.password }}
+        {% endif %}
+        <small>{{ form.password.help_text }}</small>
+      </label>
+
+      <label>
+        {{ form.remember }}
+        Remember me
+      </label>
+    </fieldset>
+
+    <input type="submit" value="Login">
+  </form>  
+</section>
+{% endblock %}

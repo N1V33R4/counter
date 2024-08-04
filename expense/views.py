@@ -76,3 +76,7 @@ def expense_clone(request, expense_id):
     expense.save()
     messages.success(request, "You spent it again!")
     return redirect(request.META.get("HTTP_REFERER", "expense_list"))
+
+
+def home(request):
+    return render(request, 'expense/home.html', {})
