@@ -1,0 +1,42 @@
+{% extends "expense/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block main %}
+<section>
+  <div class="d-flex">
+    <h2>About</h2>
+    <div>
+      <a role="button" href="{% url "account_login" %}">Login</a>
+      <a role="button" href="{% url "account_signup" %}" class="contrast">Register</a>
+    </div>
+  </div>
+  <p>Hi, my name is Pong. I'm a programmer based in Cambodia.</p>
+  <p>I needed a way to track how much I spent. I used to do this on Google Notes, but having to count the total at the end of the month was too tedious. I was lazy, so I spent days building this app.</p>
+  <p>It's not that there are other expense tracker apps out there, but I thought this would be a nice chance to try out my skills in Django.</p>
+</section>
+<section>
+  <h2>Features</h2>
+  <p>I just built whatever to meet my own needs.</p>
+  <div class="grid">
+    <article>Easy Creation</article>
+    <article>Easy Filters</article>
+  </div>
+  <article>Easy Overview</article>
+</section>
+<section>
+  <h2>Technology used</h2>
+  <p>Built it as minimal as I could. Which means this is an SSR app.</p>
+  <div class="grid">
+    <article>Django</article>
+    <article>Pico</article>
+    <article>Django packages</article>
+  </div>
+
+  <p>That doesn't mean there's no amenities of a JavaScript frontend.</p>
+  <ul>
+    <li>Saving form state</li>
+    <li>Keeping scroll after page reloads</li>
+  </ul>
+</section>
+{% endblock main %}

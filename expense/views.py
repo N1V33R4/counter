@@ -3,8 +3,9 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, F
 from datetime import date
-from .models import Expense, Currency, Category
+from .models import Expense
 from .forms import ExpenseFilter, ExpenseForm
 
 
@@ -35,6 +36,12 @@ def expense_list(request):
         "expenses": expenses,
         "form": form,
         "filters": filters,
+        "today_total": (
+            Expense.objects.values(symbol=F("currency__symbol"))
+            .filter(day=date.today())
+            .annotate(total_amount=Sum("amount"))
+            .order_by("-total_amount")
+        ),
     }
     return render(request, "expense/list.html", data)
 
@@ -50,8 +57,13 @@ def expense_update(request, expense_id):
         messages.success(request, "You updated an expense!")
         return redirect(request.session.get("return_url", "expense_list"))
     else:
-        request.session["return_url"] = request.META.get("HTTP_REFERER", None)
-        return render(request, "expense/update.html", {"form": form, "id": expense_id})
+        return_url = request.META.get("HTTP_REFERER", None)
+        request.session["return_url"] = return_url
+        return render(
+            request,
+            "expense/update.html",
+            {"form": form, "id": expense_id, "return_url": return_url},
+        )
 
 
 @login_required
@@ -79,4 +91,4 @@ def expense_clone(request, expense_id):
 
 
 def home(request):
-    return render(request, 'expense/home.html', {})
+    return render(request, "expense/home.html", {})

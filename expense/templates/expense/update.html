@@ -7,6 +7,7 @@ Mistakes are how you learn
 
 {% block main %}
 <h3>Made a mistake? No worries, mistakes are how we learn 🤟</h3>
+<p><a href="{{ return_url }}">Go back</a></p>
 <form action="{% url 'expense_update' id %}" method="POST">
   {% csrf_token %}
   <div class="grid">
@@ -16,7 +17,7 @@ Mistakes are how you learn
     </label>
     {{ form.label }}
   </div>
-
+  
   <fieldset role="group">
     {{ form.amount }}
     {{ form.currency }}
@@ -25,7 +26,7 @@ Mistakes are how you learn
   </fieldset>
   <input type="text" class="d-none" />
   <small>{{ form.errors }}</small>
-
+  
   {{ form.note }}
 </form>
 {% endblock %}
