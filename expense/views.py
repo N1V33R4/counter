@@ -4,9 +4,11 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
+from django.utils import timezone
 from datetime import date
+import calendar
 from .models import Expense
-from .forms import ExpenseFilter, ExpenseForm
+from .forms import ExpenseFilter, ExpenseForm, ExpenseSummary
 
 
 @login_required
@@ -31,17 +33,23 @@ def expense_list(request):
             }
         )
     filters = ExpenseFilter(request.GET)
-    expenses = filters.filter_query(Expense.objects.filter(user=request.user).all())
+    expenses = filters.filter_query(Expense.objects.filter(user=request.user))
+    today = timezone.now().date()
+    last = calendar.monthrange(today.year, today.month)[1]
     data = {
         "expenses": expenses,
         "form": form,
         "filters": filters,
         "today_total": (
             Expense.objects.values(symbol=F("currency__symbol"))
-            .filter(day=date.today())
+            .filter(day=today)
             .annotate(total_amount=Sum("amount"))
             .order_by("-total_amount")
         ),
+        'month_start': today.replace(day=1),
+        'month_end': today.replace(day=last),
+        'year_start': today.replace(day=1, month=1),
+        'year_end': today.replace(day=31, month=12),
     }
     return render(request, "expense/list.html", data)
 
@@ -88,6 +96,24 @@ def expense_clone(request, expense_id):
     expense.save()
     messages.success(request, "You spent it again!")
     return redirect(request.META.get("HTTP_REFERER", "expense_list"))
+
+
+@login_required
+def summary(request):
+    filters = ExpenseSummary(request.GET)
+    user_expenses = Expense.objects.filter(user=request.user)
+    total_sum = filters.filter_sum(user_expenses)
+    total_usd = 0
+    if total_sum:
+        for i in total_sum:
+            total_usd += i['total_amount'] / i['currency__amount_equal_usd'] 
+    data = {
+        "filters": filters,
+        "total_sum": total_sum,
+        "total_with_items": filters.filter_group(user_expenses),
+        "total_usd": total_usd,
+    }
+    return render(request, "expense/summary.html", data)
 
 
 def home(request):

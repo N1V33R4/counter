@@ -1,4 +1,7 @@
 from django import forms
+from django.db import models
+from django.db.models import Sum, F, CharField
+from django.db.models.functions import Concat
 from .models import Expense, Category
 
 
@@ -16,7 +19,9 @@ class ExpenseForm(forms.ModelForm):
             "label": forms.TextInput(
                 attrs={"placeholder": "Label (optional)", "class": "align-s-e"}
             ),
-            "amount": forms.NumberInput(attrs={"placeholder": "Amount", 'required': False}),
+            "amount": forms.NumberInput(
+                attrs={"placeholder": "Amount", "required": False}
+            ),
             "currency": forms.Select(attrs={"placeholder": "Currency"}),
             "note": forms.Textarea(
                 attrs={"placeholder": "Write a memorable note... (optional)", "rows": 3}
@@ -25,27 +30,108 @@ class ExpenseForm(forms.ModelForm):
 
 
 class ExpenseFilter(forms.Form):
-    from_day = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), label='From', required=False)
-    to_day = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), label="To", required=False)
-    category = forms.ModelChoiceField(Category.objects.all(), empty_label="All", required=False)
-    
+    from_day = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="From", required=False
+    )
+    to_day = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="To", required=False
+    )
+    category = forms.ModelChoiceField(
+        Category.objects.all(), empty_label="All", required=False
+    )
+
     def is_empty(self):
         for _, value in self.data.items():
             if value:
                 return False
         return True
-    
+
     def filter_query(self, query):
         if self.is_valid():
-            category = self.cleaned_data['category']
+            category = self.cleaned_data["category"]
             if category:
                 query = query.filter(category=category)
 
-            from_day = self.cleaned_data['from_day']
-            to_day = self.cleaned_data['to_day']
-            if to_day is None or from_day > to_day: 
+            from_day = self.cleaned_data["from_day"]
+            to_day = self.cleaned_data["to_day"]
+            if to_day is None or from_day > to_day:
                 to_day = from_day
             if from_day:
                 query = query.filter(day__gte=from_day, day__lte=to_day)
 
         return query
+
+
+class Group(models.TextChoices):
+    DAY = "D", "Day"
+    MONTH = "M", "Month"
+    YEAR = "Y", "Year"
+
+
+class ExpenseSummary(forms.Form):
+    from_day = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="From"
+    )
+    to_day = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), label="To")
+    category = forms.ModelChoiceField(
+        Category.objects.all(), empty_label="All", required=False
+    )
+    group = forms.ChoiceField(choices=Group.choices, label="Group by")
+
+    def clean(self):
+        cd = super().clean()
+        if self.is_valid():
+            if cd["from_day"] > cd["to_day"]:
+                raise forms.ValidationError("From day must come before.")
+        return cd
+    
+    def filter_group(self, query):
+        if self.is_valid():
+            category = self.cleaned_data["category"]
+            if category:
+                query = query.filter(category=category)
+
+            from_day = self.cleaned_data["from_day"]
+            to_day = self.cleaned_data["to_day"]
+            group = self.cleaned_data["group"]
+            match group:
+                case Group.DAY:
+                    group_filter = ["day"]
+                case Group.MONTH:
+                    group_filter = ["day__year", "day__month"]
+                case Group.YEAR:
+                    group_filter = ["day__year"]
+
+            query = (
+                query.filter(day__gte=from_day, day__lte=to_day)
+                .values(*group_filter, symbol=F("currency__symbol"))
+                .annotate(total_amount=Sum("amount"))
+                .order_by(*group_filter, "-total_amount")
+            )
+            # add a concatenated field to group the results by
+            if group == Group.MONTH:
+                query = query.annotate(
+                    year_month=Concat(
+                        "day__year", "day__month", output_field=CharField()
+                    )
+                )
+            return query
+
+    def filter_sum(self, query):
+        if self.is_valid():
+            category = self.cleaned_data["category"]
+            if category:
+                query = query.filter(category=category)
+
+            from_day = self.cleaned_data["from_day"]
+            to_day = self.cleaned_data["to_day"]
+
+            query = (
+                query
+                .filter(day__gte=from_day, day__lte=to_day)
+                .values('currency__amount_equal_usd', symbol=F("currency__symbol"))
+                .annotate(total_amount=Sum("amount"))
+                .order_by("-total_amount")
+            )
+            # print(query.query)
+            return query

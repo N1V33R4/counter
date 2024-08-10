@@ -6,7 +6,7 @@ List
 {% endblock %}
 
 {% block main %}
-<div class="d-flex">
+<div class="d-flex justify-between align-center">
   <h3 class="cap"><i>{{ user }}</i> — How much you spend again, haiya</h3>
   <!-- <h3>Promise me you won't spend more</h3> -->
   <!-- <h3>You told me you'd save, sugerbuns</h3> -->
@@ -15,6 +15,7 @@ List
     <a href="#" onclick="this.closest('form').submit();return false">Log out</a>
   </form> 
 </div>
+
 <form action="{% url 'expense_list' %}" method="POST">
   {% csrf_token %}
   <div class="grid">
@@ -128,7 +129,7 @@ List
 </h4>
 
 <p class="align-r">
-  <small>See how much you spent <a href="#">this month</a> or even <a href="#">this year</a>.</small>
+  <small>See how much you spent <a href="{% url "expense_summary" %}?from_day={{ month_start|date:'Y-m-d' }}&to_day={{ month_end|date:'Y-m-d' }}&group=D">this month</a> or even <a href="{% url "expense_summary" %}?from_day={{ year_start|date:'Y-m-d' }}&to_day={{ year_end|date:'Y-m-d' }}&group=M">this year</a>.</small>
 </p>
 
 {% endblock %}

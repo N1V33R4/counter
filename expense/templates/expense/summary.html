@@ -1,0 +1,73 @@
+{% extends 'expense/base.html' %}
+{% load humanize %}
+{% load counter_tags %}
+
+{% block title %}
+Summary
+{% endblock %}
+
+{% block main %}
+<form action="{% url "expense_summary" %}" method="GET">
+  <div class="grid">
+    <fieldset>
+      {{ filters.from_day }}
+      <small>{{ filters.from_day.label }}</small>
+    </fieldset>
+    <fieldset>
+      {{ filters.to_day }}
+      <small>{{ filters.to_day.label }}</small>
+    </fieldset>
+    <fieldset>
+      {{ filters.category }}
+      <small>{{ filters.category.label }}</small>
+    </fieldset>
+    <input type="submit" value="Filter">
+  </div>
+  
+  <div class="d-flex align-center">
+    <a href="{% url "expense_list" %}">Back to list</a>
+    <div class="align-c grow">
+      <h3 class="">
+        You spent: 
+        {% for i in total_sum %}
+        <span style="color: firebrick">{{i.total_amount|floatformat:2|intcomma }}</span> {{i.symbol}} {% if not forloop.last %}+ {% endif %}
+        {% empty %}
+        <span style="color: springgreen">zero</span>
+        {% endfor %} 
+      </h3>
+      <h4>Or about USD: $<u>{{ total_usd|floatformat:2|intcomma }}</u> in total</h4>
+    </div>
+    <fieldset class="max-w-fit m-l-a m-b-0 grow">
+      {{ filters.group }}
+      <small>{{ filters.group.label }}</small>
+    </fieldset>
+  </div>
+</form>
+
+<h4>
+Listing your summary by <i>
+{% if filters.group.value == 'D' %} {% regroup total_with_items by day as total_list %} Day
+{% elif filters.group.value == 'M' %} {% regroup total_with_items by year_month as total_list %} Month
+{% else %} {% regroup total_with_items by day__year as total_list %} Year {% endif %}</i>
+</h4>
+
+<section class="d-flex sum">
+{% for time in total_list %}
+  <article class="max-w-fit p-lr-1.5">
+    <p>
+      {% if filters.group.value == 'M' %}{{ time.grouper|slice:"4:"|month_name }}, {{ time.grouper|slice:"0:4" }} 
+      {% else %}{{ time.grouper }}{% endif %}
+    </p>
+    
+    {% for i in time.list %}
+    <div class="">
+      <b>
+        {{ i.total_amount|floatformat:2|intcomma }} {{ i.symbol }} 
+      </b>
+    </div>
+    {% endfor %}
+  </article>
+  {% endfor %}
+</section>
+
+{% endblock main %}
