@@ -55,7 +55,8 @@ Listing your summary by <i>
 {% for time in total_list %}
   <article class="max-w-fit p-lr-1.5">
     <p>
-      {% if filters.group.value == 'M' %}{{ time.grouper|slice:"4:"|month_name }}, {{ time.grouper|slice:"0:4" }} 
+      {% if filters.group.value == 'D' %}{{ time.grouper|date:'d M, Y' }}
+      {% elif filters.group.value == 'M' %}{{ time.grouper|slice:"4:"|month_name }}, {{ time.grouper|slice:":4" }} 
       {% else %}{{ time.grouper }}{% endif %}
     </p>
     

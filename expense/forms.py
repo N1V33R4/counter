@@ -2,6 +2,7 @@ from django import forms
 from django.db import models
 from django.db.models import Sum, F, CharField
 from django.db.models.functions import Concat
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Expense, Category
 
 
@@ -39,6 +40,8 @@ class ExpenseFilter(forms.Form):
     category = forms.ModelChoiceField(
         Category.objects.all(), empty_label="All", required=False
     )
+    page = forms.IntegerField(min_value=1, initial=1, required=False)
+    per_page = forms.IntegerField(min_value=10, initial=10, required=False)
 
     def is_empty(self):
         for _, value in self.data.items():
@@ -58,6 +61,16 @@ class ExpenseFilter(forms.Form):
                 to_day = from_day
             if from_day:
                 query = query.filter(day__gte=from_day, day__lte=to_day)
+
+            page = self.cleaned_data["page"] or 1
+            per_page = self.cleaned_data["per_page"] or 10
+            paginator = Paginator(query, per_page)
+            try:
+                query = paginator.page(page)
+            except EmptyPage:
+                query = paginator.page(paginator.num_pages)
+            except PageNotAnInteger:
+                query = paginator.page(1)
 
         return query
 
@@ -82,7 +95,7 @@ class ExpenseSummary(forms.Form):
         cd = super().clean()
         if self.is_valid():
             if cd["from_day"] > cd["to_day"]:
-                raise forms.ValidationError("From day must come before.")
+                self.add_error("to_day", "This date must come AFTER from.")
         return cd
     
     def filter_group(self, query):
@@ -126,12 +139,10 @@ class ExpenseSummary(forms.Form):
             from_day = self.cleaned_data["from_day"]
             to_day = self.cleaned_data["to_day"]
 
-            query = (
+            return (
                 query
                 .filter(day__gte=from_day, day__lte=to_day)
                 .values('currency__amount_equal_usd', symbol=F("currency__symbol"))
                 .annotate(total_amount=Sum("amount"))
                 .order_by("-total_amount")
             )
-            # print(query.query)
-            return query

@@ -92,7 +92,7 @@ def expense_clone(request, expense_id):
     if request.user != expense.user:
         return HttpResponseForbidden()
     expense.id = None
-    expense.day = date.today()
+    expense.day = timezone.now().date()
     expense.save()
     messages.success(request, "You spent it again!")
     return redirect(request.META.get("HTTP_REFERER", "expense_list"))
