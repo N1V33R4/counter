@@ -118,7 +118,7 @@ List
   </tbody>
 </table>
 
-{% include "pagination.html" with page=expenses %}
+{% include "pagination.html" with page=expenses parameters=filters.querystring %}
 
 <h4 class="align-c">
   Today you spent a whopping: 

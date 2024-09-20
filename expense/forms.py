@@ -57,10 +57,10 @@ class ExpenseFilter(forms.Form):
 
             from_day = self.cleaned_data["from_day"]
             to_day = self.cleaned_data["to_day"]
-            if to_day is None or from_day > to_day:
-                to_day = from_day
             if from_day:
-                query = query.filter(day__gte=from_day, day__lte=to_day)
+                query = query.filter(day__gte=from_day)
+            if to_day:
+                query = query.filter(day__lte=to_day)
 
             page = self.cleaned_data["page"] or 1
             per_page = self.cleaned_data["per_page"] or 10
@@ -73,6 +73,12 @@ class ExpenseFilter(forms.Form):
                 query = paginator.page(1)
 
         return query
+    
+    def querystring(self):
+        copy = self.data.copy()
+        copy.pop('page', True)
+        return copy.urlencode()
+
 
 
 class Group(models.TextChoices):
