@@ -4,39 +4,49 @@
 
 {% block main %}
 <section>
-  <div class="d-flex">
-    <h2>About</h2>
+  <h2>Who am I?</h2>
+  <p>
+    Hi, my name is Pong. <br>
+    Born and raised in Cambodia, I'm a programmer specializing in Python and dabbling in Go. <br>
+    When I'm not programming, you can find me at the gym or at any Japanese-themed convention.
+  </p>
+
+  <h2>Why I built this</h2>
+  <p>
+    I wanted to see how much I spend. <br>
+    I was too lazy to use pen and paper, so I used Google notes. <br>
+    I was too lazy to sum up the numbers, so I made this app. <br>
+    You could say I am <i>lazy productive</i>.
+  </p>
+
+  <h2>How was this built</h2>
+  <p>
+    This app was built on Django because it seems to get out of my way and allow me to start building quickly. No fancy JavaScript required. 
+  </p>
+
+  <h2>Features</h2>
+  <p>This app allows you to record how much you spend in differing currencies. In Cambodia, we spend the Khmer Riel and the US Dollar interchangeably, so having this built in is convenient.</p>
+  <p>You can get a good overview of how much you have spent, grouping by the day, month or even year.</p>
+
+  <article class="m-t-2 p-2"> 
+    <p>
+      If you're interested in checking this out, you can use the dummy account: <br>
+      <kbd>dummy@d.com</kbd>
+      <kbd>123</kbd>      
+    </p>
+    
+    <p>
+      If you want to sign up and actually use this, feel free to sign up. It's free, and I'm not planning on monetizing anytime soon. 
+    </p>
+    
     <div>
       <a role="button" href="{% url "account_login" %}">Login</a>
       <a role="button" href="{% url "account_signup" %}" class="contrast">Register</a>
     </div>
-  </div>
-  <p>Hi, my name is Pong. I'm a programmer based in Cambodia.</p>
-  <p>I needed a way to track how much I spent. I used to do this on Google Notes, but having to count the total at the end of the month was too tedious. I was lazy, so I spent days building this app.</p>
-  <p>It's not that there are other expense tracker apps out there, but I thought this would be a nice chance to try out my skills in Django.</p>
+  </article>
 </section>
-<section>
-  <h2>Features</h2>
-  <p>I just built whatever to meet my own needs.</p>
-  <div class="grid">
-    <article>Easy Creation</article>
-    <article>Easy Filters</article>
-  </div>
-  <article>Easy Overview</article>
-</section>
-<section>
-  <h2>Technology used</h2>
-  <p>Built it as minimal as I could. Which means this is an SSR app.</p>
-  <div class="grid">
-    <article>Django</article>
-    <article>Pico</article>
-    <article>Django packages</article>
-  </div>
 
-  <p>That doesn't mean there's no amenities of a JavaScript frontend.</p>
-  <ul>
-    <li>Saving form state</li>
-    <li>Keeping scroll after page reloads</li>
-  </ul>
+<section class="align-r">
+  <small>If you have any feature requests, please contact me <a href="https://github.com/N1V33R4" target="_blank">here</a>.</small>
 </section>
 {% endblock main %}

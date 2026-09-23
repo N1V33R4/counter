@@ -1,8 +1,10 @@
+import calendar
 from django import forms
 from django.db import models
 from django.db.models import Sum, F, CharField
 from django.db.models.functions import Concat
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from datetime import date, timedelta
 from .models import Expense, Category
 
 
@@ -152,3 +154,18 @@ class ExpenseSummary(forms.Form):
                 .annotate(total_amount=Sum("amount"))
                 .order_by("-total_amount")
             )
+
+    def prev_month_qs(self):
+        if self.is_valid():
+            from_day: date = self.cleaned_data['from_day']
+            prev_month_last = from_day.replace(day=1) - timedelta(days=1)
+            prev_month_first = prev_month_last.replace(day=1)
+            return f'?from_day={prev_month_first.strftime('%Y-%m-%d')}&to_day={prev_month_last.strftime('%Y-%m-%d')}&group=D'
+        
+    def next_month_qs(self):
+        if self.is_valid():
+            from_day: date = self.cleaned_data['from_day']
+            next_month_first = (from_day.replace(day=1) + timedelta(days=32)).replace(day=1)
+            last = calendar.monthrange(next_month_first.year, next_month_first.month)[1]
+            next_month_last = next_month_first.replace(day=last)
+            return f'?from_day={next_month_first.strftime('%Y-%m-%d')}&to_day={next_month_last.strftime('%Y-%m-%d')}&group=D'

@@ -44,18 +44,36 @@ Summary
   </div>
 </form>
 
-<h4>
-Listing your summary by <i>
-{% if filters.group.value == 'D' %} {% regroup total_with_items by day as total_list %} Day
-{% elif filters.group.value == 'M' %} {% regroup total_with_items by year_month as total_list %} Month
-{% else %} {% regroup total_with_items by day__year as total_list %} Year {% endif %}</i>
-</h4>
+<div class="d-flex justify-between">
+  <h4 class="d-in-block">
+    Listing your summary by <i>
+    {% if filters.group.value == 'D' %} {% regroup total_with_items by day as total_list %} Day
+    {% elif filters.group.value == 'M' %} {% regroup total_with_items by year_month as total_list %} Month
+    {% else %} {% regroup total_with_items by day__year as total_list %} Year {% endif %}</i>
+  </h4>
+
+  
+  {% if filters.group.value == 'D' %}
+  <div class="d-flex g-0.5">
+    <a href="{% url 'expense_summary' %}{{filters.prev_month_qs}}" class="">
+      Last month
+    </a>
+    -
+    <a href="{% url 'expense_summary' %}{{filters.next_month_qs}}" class="">
+      Next month
+    </a>
+  </div>
+    {% endif %}
+</div>
 
 <section class="d-flex sum">
 {% for time in total_list %}
   <article class="max-w-fit p-lr-1.5">
     <p>
-      {% if filters.group.value == 'D' %}{{ time.grouper|date:'d M, Y' }}
+      {% if filters.group.value == 'D' %}
+      <a href="{% url "expense_list" %}?from_day={{time.grouper|date:'Y-m-d'}}&to_day={{time.grouper|date:'Y-m-d'}}" class="decor-none">
+        {{ time.grouper|date:'d M, Y' }}
+      </a>
       {% elif filters.group.value == 'M' %}{{ time.grouper|slice:"4:"|month_name }}, {{ time.grouper|slice:":4" }} 
       {% else %}{{ time.grouper }}{% endif %}
     </p>
